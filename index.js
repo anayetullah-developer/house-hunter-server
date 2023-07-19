@@ -36,7 +36,7 @@ const houseCollection = client.db("house-hunter").collection("houses");
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+    // await client.connect();
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
@@ -94,7 +94,14 @@ app.post('/login', async (req, res) => {
 })
 
 
-//House owner apis
+//Client side apis - Home page
+app.get("/houses", async (req, res) => {
+	const result = await houseCollection.find().toArray();
+	res.send(result);
+  });
+
+
+//Dashboard apis - House owner 
 
 app.post("/house-owner/addHouse", async (req, res) => {
 	const houseInfo = req.body;
@@ -125,6 +132,25 @@ app.post("/house-owner/addHouse", async (req, res) => {
 	const id = req.params.id;
 	const query = { _id: new ObjectId(id) };
 	const result = await houseCollection.findOne(query);
+	res.send(result);
+  });
+
+  app.patch("/house-owner/updateHouse/:id", async (req, res) => {
+	const id = req.params.id;
+	const body = req.body;
+	console.log(body);
+	const query = { _id: new ObjectId(id) };
+	const updateClass = {
+	  $set: {
+		instructorName: body.instructorName,
+		photoURL: body.photoURL,
+		price: body.price,
+		name: body.name,
+		email: body.email,
+		seats: body.seats,
+	  },
+	};
+	const result = await houseCollection.updateOne(query, updateClass);
 	res.send(result);
   });
   
