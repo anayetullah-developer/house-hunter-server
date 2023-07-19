@@ -47,52 +47,54 @@ async function run() {
 run().catch(console.dir);
 
 
-// app.post("/register", async (req, res) => {
-//   try {
-//     const newPassword = await bcrypt.hash(req.body.password, 10)
-//     const user = await User.create({
-// 			name: req.body.name,
-// 			email: req.body.email,
-// 			password: newPassword,
-//       role: req.body.role
-// 		})
-//     res.json({ status: 'ok' })
-//   }
+app.post("/register", async (req, res) => {
+  try {
+    const newPassword = await bcrypt.hash(req.body.password, 10)
+    const user = await User.create({
+			name: req.body.name,
+			email: req.body.email,
+			password: newPassword,
+      role: req.body.role
+		})
+    res.json({ status: 'ok' })
+  }
 
-// 	catch (err) {
-// 		res.json({ status: 'error', error: 'Duplicate email' })
-// 	}
-// })
+	catch (err) {
+		res.json({ status: 'error', error: 'Duplicate email' })
+	}
+})
 
-// app.post('/login', async (req, res) => {
-// 	const user = await User.findOne({
-// 		email: req.body.email,
-// 	})
+app.post('/login', async (req, res) => {
+	const user = await User.findOne({
+		email: req.body.email,
+	})
 
-// 	if (!user) {
-// 		return { status: 'error', error: 'Invalid login' }
-// 	}
+	if (!user) {
+		return { status: 'error', error: 'Invalid login' }
+	}
 
-// 	const isPasswordValid = await bcrypt.compare(
-// 		req.body.password,
-// 		user.password
-// 	)
+	const isPasswordValid = await bcrypt.compare(
+		req.body.password,
+		user.password
+	)
 
-// 	if (isPasswordValid) {
-// 		const token = jwt.sign(
-// 			{
-// 				email: user.email,
-// 				role: user.role
-// 			},
-// 			'secret123'
-// 		)
+	if (isPasswordValid) {
+		const token = jwt.sign(
+			{
+				email: user.email,
+				role: user.role
+			},
+			'secret123'
+		)
 
-// 		return res.json({ status: 'ok', user: token })
-// 	} else {
-// 		return res.json({ status: 'error', user: false })
-// 	}
-// })
+		return res.json({ status: 'ok', user: token })
+	} else {
+		return res.json({ status: 'error', user: false })
+	}
+})
 
+
+//House owner apis
 
 app.post("/house-owner/addHouse", async (req, res) => {
 	const houseInfo = req.body;
@@ -101,6 +103,15 @@ app.post("/house-owner/addHouse", async (req, res) => {
 	res.send(result);
   });
 
+  app.get("/house-owner/myHouses", async (req, res) => {
+	const email = req.query.email;
+	if(!email) {
+	  res.send([])
+	}
+	const query = {email: email}
+	const result = await houseCollection.find(query).toArray();
+	res.send(result);
+  });
 
 app.get("/", (req, res) => {
   res.send("Server is working");
