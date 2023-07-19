@@ -19,7 +19,7 @@ const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@clu
 mongoose.connect(uri)
 
 
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const uri1 = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.kkdykse.mongodb.net/?retryWrites=true&w=majority`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -111,6 +111,14 @@ app.post("/house-owner/addHouse", async (req, res) => {
 	const query = {email: email}
 	const result = await houseCollection.find(query).toArray();
 	res.send(result);
+  });
+
+  app.delete("/my-houses/selected-house/:id", async (req, res) => {
+	const id = req.params.id;
+	const query = { _id: new ObjectId(id) };
+	const result = await houseCollection.deleteOne(query);
+	res.send(result);
+  
   });
 
 app.get("/", (req, res) => {
