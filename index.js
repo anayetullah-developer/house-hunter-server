@@ -2,7 +2,7 @@ const express = require("express");
 const app = express();
 const cors = require("cors");
 const jwt = require('jsonwebtoken');
-const port = process.env.PORT || 5000;
+const port = process.env.PORT || 5001;
 const mongoose = require('mongoose');
 const User = require('./models/users')
 const bcrypt = require('bcryptjs')
@@ -36,7 +36,7 @@ const houseCollection = client.db("house-hunter").collection("houses");
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    // await client.connect();
+    await client.connect();
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
@@ -54,7 +54,8 @@ app.post("/register", async (req, res) => {
 			name: req.body.name,
 			email: req.body.email,
 			password: newPassword,
-      role: req.body.role
+      		role: req.body.role,
+      		phone: req.body.phone
 		})
     res.json({ status: 'ok' })
   }
@@ -82,6 +83,8 @@ app.post('/login', async (req, res) => {
 		const token = jwt.sign(
 			{
 				email: user.email,
+				phone: user.phone,
+				name: user.name,
 				role: user.role
 			},
 			'secret123'
@@ -111,11 +114,11 @@ app.post("/house-owner/addHouse", async (req, res) => {
   });
 
   app.get("/house-owner/myHouses", async (req, res) => {
-	const email = req.query.email;
-	if(!email) {
+	const phone = req.query.phone;
+	if(!phone) {
 	  res.send([])
 	}
-	const query = {email: email}
+	const query = {phone: phone}
 	const result = await houseCollection.find(query).toArray();
 	res.send(result);
   });
@@ -142,12 +145,16 @@ app.post("/house-owner/addHouse", async (req, res) => {
 	const query = { _id: new ObjectId(id) };
 	const updateClass = {
 	  $set: {
-		instructorName: body.instructorName,
-		photoURL: body.photoURL,
-		price: body.price,
 		name: body.name,
-		email: body.email,
-		seats: body.seats,
+		photoURL: body.photoURL,
+		bathrooms: body.bathrooms,
+		bedrooms: body.bedrooms,
+		size: body.size,
+		city: body.city,
+		date: body.date,
+		address: body.address,
+		rent: body.rent,
+		desc: body.desc,
 	  },
 	};
 	const result = await houseCollection.updateOne(query, updateClass);
